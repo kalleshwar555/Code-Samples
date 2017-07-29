@@ -1,0 +1,71 @@
+    window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
+navigator.webkitPersistentStorage.requestQuota(5 * 1024 * 1024, function(grantedBytes) {
+    window.webkitRequestFileSystem(PERSISTENT, grantedBytes, initFileSystem, errorHandler);
+    console.log('grantedBytes>>>', grantedBytes);
+}, function(e) {
+    console.log('Error>>>', e);
+});
+
+// A simple error handler to be used throughout this demo.
+function errorHandler(error) {
+    console.log(error);
+}
+
+
+// Request a FileSystem and set the filesystem variable.
+function initFileSystem() {
+    navigator.webkitPersistentStorage.requestQuota(1024 * 1024 * 5,
+        function(grantedSize) {
+
+            // Request a file system with the new size.
+            window.requestFileSystem(window.PERSISTENT, grantedSize, function(fs) {
+                fs.root.getFile('logofProductsales123.txt', {
+                    create: true
+                }, function(fileEntry) {
+
+                    //write file
+                    fileEntry.createWriter(function(fileWriter) {
+                        fileWriter.onwriteend = function(e) {};
+
+                        fileWriter.onerror = function(e) {
+                            console.log('Write error: ' + e.toString());
+                            alert('An error occurred and your file could not be saved!');
+                        };
+                        fileWriter.seek(fileWriter.length);
+                        var contentBlob = new Blob(['Lorem Ipsum Next Round'], {
+                            type: 'text/plain'
+                        });
+
+                        fileWriter.write(contentBlob);
+
+                    }, errorHandler);
+
+                    //Read File
+                    fileEntry.file(function(file) {
+                        var reader = new FileReader();
+
+                        reader.onload = function(e) {
+                            var csvInput = this.result;
+                            $scope.loading_Summary = false;
+
+                            if (navigator.msSaveBlob) {
+                                navigator.msSaveBlob(new Blob([csvInput], {
+                                    type: "text/csv;charset=utf-8;"
+                                }), "productMixSalesExport.csv")
+                            } else {
+                                var hiddenElement = document.createElement('a');
+                                hiddenElement.href = 'data:attachment/csv,' + encodeURI(csvInput);
+                                hiddenElement.target = '_blank';
+                                hiddenElement.download = 'productMixSalesExport.csv';
+                                hiddenElement.click();
+                            }
+                        };
+                        reader.readAsText(file);
+                    }, errorHandler);
+
+                }, errorHandler);
+
+            }, errorHandler);
+
+        }, errorHandler);
+}
