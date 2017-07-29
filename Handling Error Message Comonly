@@ -1,0 +1,17 @@
+function getErrMsgByStatus(nameKey, array){
+    for (var i=0; i < array.length; i++) {
+        if (array[i].key === nameKey) {
+            return array[i].value;
+        }
+    }
+}
+
+var errMessageArray = [{key: '204', value: "No Data Found."}, 
+                       {key: '500', value: "Internal Server Error."}, 
+                       {key: '403', value: "Access Forbidden."},
+                       {key: 'NOT_FOUND', value: "No data found or Report session is expired."},
+                       {key: 'NO_DATA', value: "No Data found for selected period."},
+                       {key: 'SESSION_EXPIRED', value: "The session for this report has expired, please run the report again from within the Enterprise Manager."}
+                      ];
+					  
+$scope.errMessage = getErrMsgByStatus('SESSION_EXPIRED',errMessageArray); 
